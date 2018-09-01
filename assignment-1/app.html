@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Assigment 1</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+</head>
+<body>
+    <section>
+        <h1>Introduction to Image Processing</h1>
+        <h2>Assigment 1</h2>
+        <p class="status red">Loading Open CV...</p>
+
+        <div class="container">
+            <button class="button">Select image</button>
+            <div class="canvas-container">
+                <div class="spinner">
+                    <div class="lds-dual-ring"></div>
+                </div>
+                <canvas id="canvas" display: hidden></canvas>
+            </div>
+        </div>
+        
+    </section>
+    
+    <footer>
+        Victor Landim 2018
+    </footer>
+    <img class="image" alt="No Image" display: hidden />
+    <input type="file" class="file-input" display: hidden name="file" />
+</body>
+<script type="text/javascript" src="opencv.js"></script>
+<script type="text/javascript" src="script.js"></script>
+</html>
