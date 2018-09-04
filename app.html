@@ -9,18 +9,19 @@
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 </head>
 <body>
+    <p class="status-container">Status: <span class="status-message status-red">Loading Open CV...</span></p>
     <section>
         <h1>Introduction to Image Processing</h1>
-        <h2>Assigment 1</h2>
-        <p class="status red">Loading Open CV...</p>
+        <h2>Assignment 1</h2>
 
         <div class="container">
-            <button class="button">Select image</button>
+            <button class="button" id="select-image">Select image</button>
+            <button class="button" id="run">Run</button>
             <div class="canvas-container">
                 <div class="spinner">
                     <div class="lds-dual-ring"></div>
                 </div>
-                <canvas id="canvas" display: hidden></canvas>
+                <canvas id="canvas"></canvas>
             </div>
         </div>
         

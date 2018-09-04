@@ -3,33 +3,35 @@
 document.addEventListener('DOMContentLoaded', () => {
     const select = s => document.querySelector(s);
 
-    const status = select('.status');
+    const status = select('.status-message');
     const image = select('.image');
     const fileInput = select('.file-input');
-    const button = select('.button');
+    const runButton = select('#run');
+    const imgButton = select('#select-image');
     const spinner = select('.spinner');
     const canvas = select('#canvas');
 
     status.innerHTML = 'Open CV loaded successfully';
-    status.classList.remove('red');
-    status.classList.add('green');
+    status.classList.remove('status-red');
+    status.classList.add('status-green');
 
     fileInput.addEventListener('change', e => {
         image.src = URL.createObjectURL(e.target.files[0]);
     });
 
-    button.onclick = () => {
+    image.onload = () => { console.log('Image loaded.'); }
+
+    imgButton.onclick = () => { fileInput.click() };
+
+    runButton.onclick = () => {
         spinner.style.display = 'block';
-        canvas.style.display = 'none';
-        fileInput.click();
+
+        window.setTimeout(run, 10);
     };
 
-    image.onload = () => {
+    const run = () => {
         let mat = cv.imread(image);
         let displayMat = cv.imread(image);
-
-        spinner.style.display = 'none';
-        canvas.style.display = 'block';
 
         cv.imshow('canvas', displayMat);
 
@@ -47,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let bestDistance = euclideanDistance(current, dest);
 
         toGrayScale(mat);
-        toGrayScale(displayMat);
+        // toGrayScale(displayMat);
 
         //or while current != dest
         while (euclideanDistance(current, dest) !== 0) {
@@ -89,10 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
         setPixel(displayMat, origin.x, origin.y, CYAN);
         setPixel(displayMat, dest.x, dest.y, CYAN);
 
+        spinner.style.display = 'none';
         cv.imshow('canvas', displayMat);
         mat.delete();
         displayMat.delete();
     };
+
 });
 
 const RED = {
