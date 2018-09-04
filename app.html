@@ -9,30 +9,47 @@
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 </head>
 <body>
-    <p class="status-container">Status: <span class="status-message status-red">Loading Open CV...</span></p>
-    <section>
-        <h1>Introduction to Image Processing</h1>
-        <h2>Assignment 1</h2>
+    <div class="main-container">
+        <aside>
+            
+            <h1>Introduction to Image Processing</h1>
+            <h2>Assignment 1: Mission on Mars</h2>
 
-        <div class="container">
-            <button class="button" id="select-image">Select image</button>
-            <button class="button" id="run">Run</button>
+            <p class="status-container">Status: <span class="status-message status-red">Loading Open CV...</span></p>
+    
+            <h3>I. In the search for supplies </h3>
+            <div class="container">
+                <button class="button" id="select-image">Select image</button>
+                <button class="button" id="run">Run</button>
+            </div>
+
+            <div class="selected-image">
+                <p class="image-filename">Select a file</p> <img class="thumb-image"  />
+            </div>
+
+            <p class="dm-distance"></p>
+
+            
+            <h3>II. Could there be life? </h3>
+            
+            <footer>
+                Victor Landim 2018
+            </footer>
+        </aside>
+        
+        <section>
             <div class="canvas-container">
                 <div class="spinner">
                     <div class="lds-dual-ring"></div>
                 </div>
                 <canvas id="canvas"></canvas>
             </div>
-        </div>
-        
-    </section>
+        </section>
+    </div>
     
-    <footer>
-        Victor Landim 2018
-    </footer>
-    <img class="image" alt="No Image" display: hidden />
+    <img class="image"  display: hidden />
     <input type="file" class="file-input" display: hidden name="file" />
 </body>
-<script type="text/javascript" src="opencv.js"></script>
+<script type="text/javascript" src="opencv.js"></script> 
 <script type="text/javascript" src="script.js"></script>
 </html>

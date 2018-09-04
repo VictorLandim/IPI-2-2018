@@ -2,26 +2,37 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const select = s => document.querySelector(s);
+    const show = e => (e.style.display = 'block');
+    const hide = e => (e.style.display = 'none');
 
     const status = select('.status-message');
     const image = select('.image');
+    const thumbnail = select('.thumb-image');
+    const distance = select('.dm-distance');
+    const imageFilename = select('.image-filename');
     const fileInput = select('.file-input');
     const runButton = select('#run');
     const imgButton = select('#select-image');
     const spinner = select('.spinner');
-    const canvas = select('#canvas');
 
     status.innerHTML = 'Open CV loaded successfully';
     status.classList.remove('status-red');
     status.classList.add('status-green');
+    hide(spinner);
 
     fileInput.addEventListener('change', e => {
         image.src = URL.createObjectURL(e.target.files[0]);
+        thumbnail.src = URL.createObjectURL(e.target.files[0]);
+        imageFilename.innerHTML = e.target.files[0].name;
     });
 
-    image.onload = () => { console.log('Image loaded.'); }
+    image.onload = () => {
+        console.log('Image loaded.');
+    };
 
-    imgButton.onclick = () => { fileInput.click() };
+    imgButton.onclick = () => {
+        fileInput.click();
+    };
 
     runButton.onclick = () => {
         spinner.style.display = 'block';
@@ -51,15 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
         toGrayScale(mat);
         // toGrayScale(displayMat);
 
-        //or while current != dest
-        while (euclideanDistance(current, dest) !== 0) {
-            // for (var i = 0; i < 10000; i++) {
-            let eightNeightbours = getEightNeightbours(mat, current.x, current.y);
+        let tries = 0;
+        let maxTries = 10000;
 
-            // console.log('%d,    %d,    %d', eightNeightbours[0].r, eightNeightbours[1].r, eightNeightbours[2].r);
-            // console.log('%d,    .      %d', eightNeightbours[3].r, eightNeightbours[4].r);
-            // console.log('%d,    %d,    %d', eightNeightbours[5].r, eightNeightbours[6].r, eightNeightbours[7].r);
-            // console.log('-------------');
+        //or while current != dest
+        while (euclideanDistance(current, dest) !== 0 || tries >= maxTries) {
+            let eightNeightbours = getEightNeightbours(mat, current.x, current.y);
 
             eightNeightbours = eightNeightbours.map(e => ({
                 ...e,
@@ -75,28 +83,23 @@ document.addEventListener('DOMContentLoaded', () => {
             //sort by gray level
             candidates.sort((a, b) => a.r - b.r);
 
-            //lowest distance and lowest gray level
-            // TODO
-            // if (candidates[0].distance <= bestDistance) {
-            //     current = candidates[0];
-            // } else {
-            //     current = candidates[Math.round(Math.random() + 1)];
-            // }
             current = candidates[0];
             bestDistance = current.distance;
 
             setPixel(displayMat, current.x, current.y, BLACK);
+            tries++;
         }
 
         setPixel(displayMat, origin.x, origin.y, CYAN);
         setPixel(displayMat, dest.x, dest.y, CYAN);
 
         spinner.style.display = 'none';
+        distance.innerHTML = `Dm distance: ${tries}`;
+
         cv.imshow('canvas', displayMat);
         mat.delete();
         displayMat.delete();
     };
-
 });
 
 const RED = {
