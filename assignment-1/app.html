@@ -17,20 +17,42 @@
 
             <p class="status-container">Status: <span class="status-message status-red">Loading Open CV...</span></p>
     
-            <h3>I. In the search for supplies </h3>
-            <div class="container">
-                <button class="button" id="select-image">Select image</button>
-                <button class="button" id="run">Run</button>
+            <div class="assignment-container">
+                <h3>I. In the search for supplies </h3>
+                
+                <div class="image-error" id="image-error1">
+                    No file selected
+                </div>
+
+                <div class="button-container">
+                    <button class="button" id="select-image1">Select image</button>
+                    <button class="button" id="run1">Run</button>
+                </div>
+
+                <div id="selected-image1" class="selected-image">
+                    <p class="image-filename" id="filename1">Select a file</p> <img class="thumbnail" id="thumb1" />
+                </div>
+
+                <p class="dm-distance"></p>
             </div>
 
-            <div class="selected-image">
-                <p class="image-filename">Select a file</p> <img class="thumb-image"  />
+            <div class="assignment-container">
+                <h3>II. Could there be life? </h3>
+
+                <div class="image-error" id="image-error2">
+                    No file selected
+                </div>
+
+                <div class="button-container">
+                    <button class="button" id="select-image2">Select image</button>
+                    <button class="button" id="run2">Run</button>
+                </div>
+
+                <div id="selected-image2" class="selected-image">
+                    <p class="image-filename" id="filename2">Select a file</p> <img class="thumbnail" id="thumb2" />
+                </div>
+
             </div>
-
-            <p class="dm-distance"></p>
-
-            
-            <h3>II. Could there be life? </h3>
             
             <footer>
                 Victor Landim 2018
@@ -47,9 +69,12 @@
         </section>
     </div>
     
-    <img class="image"  display: hidden />
-    <input type="file" class="file-input" display: hidden name="file" />
+    <img id="image1" display: hidden />
+    <img id="image2" display: hidden />
+    <input type="file" id="file-input1" display: hidden />
+    <input type="file" id="file-input2" display: hidden />
 </body>
-<script type="text/javascript" src="scripts/opencv.js"></script> 
-<script type="text/javascript" src="scripts/script.js"></script>
+    <script type="text/javascript" src="scripts/opencv.js"></script> 
+    <script type="text/javascript" src="scripts/helpers.js"></script>
+    <script type="text/javascript" src="scripts/script.js"></script>
 </html>

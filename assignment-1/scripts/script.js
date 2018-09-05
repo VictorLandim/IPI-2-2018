@@ -1,168 +1,202 @@
+// Strict mode for error handling
 'use strict';
 
+// Useful functions
+const select = s => document.querySelector(s);
+const show = e => (e.style.display = 'block');
+const hide = e => (e.style.display = 'none');
+
+// Element constants
+const status = select('.status-message');
+
+const spinner = select('.spinner');
+
+const image1 = select('#image1');
+const image2 = select('#image2');
+
+const thumbnail1 = select('#thumb1');
+const thumbnail2 = select('#thumb2');
+
+const filename1 = select('#filename1');
+const filename2 = select('#filename2');
+
+const fileInput1 = select('#file-input1');
+const fileInput2 = select('#file-input2');
+
+const runButton1 = select('#run1');
+const runButton2 = select('#run2');
+
+const imgButton1 = select('#select-image1');
+const imgButton2 = select('#select-image2');
+
+const selectedImage1 = select('#selected-image1');
+const selectedImage2 = select('#selected-image2');
+
+const imageError1 = select('#image-error1');
+const imageError2 = select('#image-error2');
+
+// data
+const distance = select('.dm-distance');
+
+// Entry point
 document.addEventListener('DOMContentLoaded', () => {
-    const select = s => document.querySelector(s);
-    const show = e => (e.style.display = 'block');
-    const hide = e => (e.style.display = 'none');
-
-    const status = select('.status-message');
-    const image = select('.image');
-    const thumbnail = select('.thumb-image');
-    const distance = select('.dm-distance');
-    const imageFilename = select('.image-filename');
-    const fileInput = select('.file-input');
-    const runButton = select('#run');
-    const imgButton = select('#select-image');
-    const spinner = select('.spinner');
-
     status.innerHTML = 'Open CV loaded successfully';
     status.classList.remove('status-red');
     status.classList.add('status-green');
+
     hide(spinner);
 
-    fileInput.addEventListener('change', e => {
-        image.src = URL.createObjectURL(e.target.files[0]);
-        thumbnail.src = URL.createObjectURL(e.target.files[0]);
-        imageFilename.innerHTML = e.target.files[0].name;
+    // Setup
+    fileInput1.addEventListener('change', e => {
+        image1.src = URL.createObjectURL(e.target.files[0]);
+        thumbnail1.src = URL.createObjectURL(e.target.files[0]);
+        filename1.innerHTML = e.target.files[0].name;
+        show(selectedImage1);
+        hide(imageError1);
     });
 
-    image.onload = () => {
-        console.log('Image loaded.');
+    fileInput2.addEventListener('change', e => {
+        image2.src = URL.createObjectURL(e.target.files[0]);
+        thumbnail2.src = URL.createObjectURL(e.target.files[0]);
+        filename2.innerHTML = e.target.files[0].name;
+        show(selectedImage2);
+        hide(imageError2);
+    });
+
+    imgButton1.onclick = () => {
+        fileInput1.click();
     };
 
-    imgButton.onclick = () => {
-        fileInput.click();
+    imgButton2.onclick = () => {
+        fileInput2.click();
     };
 
-    runButton.onclick = () => {
+    // Run assignment 1
+    runButton1.onclick = () => {
         spinner.style.display = 'block';
 
-        window.setTimeout(run, 10);
+        window.setTimeout(() => run1(image1), 10);
     };
 
-    const run = () => {
-        let mat = cv.imread(image);
-        let displayMat = cv.imread(image);
+    // Run assignment 2
+    runButton2.onclick = () => {
+        spinner.style.display = 'block';
 
-        cv.imshow('canvas', displayMat);
-
-        const origin = {
-            x: 260,
-            y: 415
-        };
-
-        const dest = {
-            x: 815,
-            y: 1000
-        };
-
-        let current = origin;
-        let bestDistance = euclideanDistance(current, dest);
-
-        toGrayScale(mat);
-        // toGrayScale(displayMat);
-
-        let tries = 0;
-        let maxTries = 10000;
-
-        //or while current != dest
-        while (euclideanDistance(current, dest) !== 0 || tries >= maxTries) {
-            let eightNeightbours = getEightNeightbours(mat, current.x, current.y);
-
-            eightNeightbours = eightNeightbours.map(e => ({
-                ...e,
-                distance: euclideanDistance(e, dest)
-            }));
-
-            //sort by distance
-            eightNeightbours.sort((a, b) => a.distance - b.distance);
-
-            //3 closest pixels
-            const candidates = eightNeightbours.slice(0, 3);
-
-            //sort by gray level
-            candidates.sort((a, b) => a.r - b.r);
-
-            current = candidates[0];
-            bestDistance = current.distance;
-
-            setPixel(displayMat, current.x, current.y, BLACK);
-            tries++;
-        }
-
-        setPixel(displayMat, origin.x, origin.y, CYAN);
-        setPixel(displayMat, dest.x, dest.y, CYAN);
-
-        spinner.style.display = 'none';
-        distance.innerHTML = `Dm distance: ${tries}`;
-
-        cv.imshow('canvas', displayMat);
-        mat.delete();
-        displayMat.delete();
+        // Run processor intensive task
+        window.setTimeout(() => run2(image2), 10);
     };
 });
 
-const RED = {
-    r: 255,
-    g: 0,
-    b: 0,
-    a: 255
+// Run assignment 1
+const run1 = image => {
+    const mat = cv.imread(image);
+    const displayMat = cv.imread(image);
+
+    const origin = {
+        x: 260,
+        y: 415
+    };
+
+    const dest = {
+        x: 815,
+        y: 1000
+    };
+
+    let current = origin;
+
+    toGrayScale(mat);
+    // toGrayScale(displayMat);
+
+    // Loop may never break
+    const maxTries = 10000;
+    let tries = 0;
+
+    while (euclideanDistance(current, dest) !== 0 || tries >= maxTries) {
+        let eightNeightbours = getEightNeighbours(mat, current.x, current.y);
+
+        eightNeightbours = eightNeightbours.map(e => ({
+            ...e,
+            distance: euclideanDistance(e, dest)
+        }));
+
+        //sort by distance
+        eightNeightbours.sort((a, b) => a.distance - b.distance);
+
+        //3 closest pixels
+        const candidates = eightNeightbours.slice(0, 3);
+
+        //sort by gray level
+        candidates.sort((a, b) => a.r - b.r);
+
+        current = candidates[0];
+
+        setPixel(displayMat, current.x, current.y, BLACK);
+        tries++;
+    }
+
+    setPixel(displayMat, origin.x, origin.y, CYAN);
+    setPixel(displayMat, dest.x, dest.y, CYAN);
+
+    spinner.style.display = 'none';
+    distance.innerHTML = `Dm distance: ${tries}`;
+
+    cv.imshow('canvas', displayMat);
+    mat.delete();
+    displayMat.delete();
 };
 
-const CYAN = {
-    r: 0,
-    g: 255,
-    b: 255,
-    a: 255
-};
+// Run assignment 2
+const run2 = image => {
+    const mat = cv.imread(image);
+    const displayMat = cv.imread(image);
 
-const BLACK = {
-    r: 0,
-    g: 0,
-    b: 0,
-    a: 255
-};
+    const labels = [];
+    let currentLabel = 0;
 
-const getPixel = (mat, x, y) => ({
-    x,
-    y,
-    r: mat.data[x * mat.cols * mat.channels() + y * mat.channels()],
-    g: mat.data[x * mat.cols * mat.channels() + y * mat.channels() + 1],
-    b: mat.data[x * mat.cols * mat.channels() + y * mat.channels() + 2],
-    a: mat.data[x * mat.cols * mat.channels() + y * mat.channels() + 3]
-});
-
-const setPixel = (mat, x, y, { r, g, b, a }) => {
-    mat.data[x * mat.cols * mat.channels() + y * mat.channels()] = r;
-    mat.data[x * mat.cols * mat.channels() + y * mat.channels() + 1] = g;
-    mat.data[x * mat.cols * mat.channels() + y * mat.channels() + 2] = b;
-    mat.data[x * mat.cols * mat.channels() + y * mat.channels() + 3] = a;
-};
-
-const toGrayScale = mat => {
     const rows = mat.rows;
     const cols = mat.cols;
 
-    for (var i = 0; i < rows; i++) {
-        for (var j = 0; j < cols; j++) {
-            let pixel = getPixel(mat, i, j);
-            const y = pixel.r * 0.299 + pixel.g * 0.587 + pixel.b * 0.114;
-            pixel.r = pixel.g = pixel.b = y;
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            const pixel = getPixel(mat, i, j);
 
-            setPixel(mat, i, j, pixel);
+            if (isBlack(pixel)) {
+                let chosenLabel;
+                const eightNeighbours = getEightNeighbours(mat, i, j);
+                eightNeighbours.forEach(p => {
+                    for (let l of labels) {
+                        if (l.x === p.x && l.y === p.y) {
+                            chosenLabel = l.label;
+                            break;
+                        }
+                    }
+                });
+
+                console.log(i, j, chosenLabel);
+
+                // If there is a chosenLabel, pixel is near labeled black pixel
+                if (chosenLabel) {
+                    labels.push({
+                        x: i,
+                        y: j,
+                        label: chosenLabel
+                    });
+                } else {
+                    labels.push({
+                        x: i,
+                        y: j,
+                        label: currentLabel++
+                    });
+                }
+            }
         }
     }
+
+    console.log(labels.map(x => x.label));
+
+    spinner.style.display = 'none';
+
+    cv.imshow('canvas', mat);
+    mat.delete();
+    displayMat.delete();
 };
-
-const getEightNeightbours = (mat, x, y) => [
-    getPixel(mat, x - 1, y - 1),
-    getPixel(mat, x, y - 1),
-    getPixel(mat, x + 1, y - 1),
-    getPixel(mat, x - 1, y),
-    getPixel(mat, x + 1, y),
-    getPixel(mat, x - 1, y + 1),
-    getPixel(mat, x, y + 1),
-    getPixel(mat, x + 1, y + 1)
-];
-
-const euclideanDistance = (a, b) => Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
