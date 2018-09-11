@@ -36,7 +36,15 @@ const imageError1 = select('#image-error1');
 const imageError2 = select('#image-error2');
 
 // data
-const distance = select('.dm-distance');
+const metrics1 = select('#metrics1');
+const metrics2 = select('#metrics2');
+
+const dm = select('#dm');
+const d4 = select('#d4');
+const d8 = select('#d8');
+const de = select('#de');
+
+const cc = select('#cc');
 
 // Entry point
 document.addEventListener('DOMContentLoaded', () => {
@@ -89,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Run assignment 1
 const run1 = image => {
+    // Read image
     const mat = cv.imread(image);
     const displayMat = cv.imread(image);
 
@@ -108,12 +117,13 @@ const run1 = image => {
     // toGrayScale(displayMat);
 
     // Loop may never break
-    const maxTries = 10000;
-    let tries = 0;
+    const maxSteps = 10000;
+    let steps = 0;
 
-    while (euclideanDistance(current, dest) !== 0 || tries >= maxTries) {
+    while (euclideanDistance(current, dest) !== 0 || steps >= maxSteps) {
         let eightNeightbours = getEightNeighbours(mat, current.x, current.y);
 
+        // calculate euclidean distance for each neighbour
         eightNeightbours = eightNeightbours.map(e => ({
             ...e,
             distance: euclideanDistance(e, dest)
@@ -128,17 +138,26 @@ const run1 = image => {
         //sort by gray level
         candidates.sort((a, b) => a.r - b.r);
 
+        // get first element
         current = candidates[0];
 
         setPixel(displayMat, current.x, current.y, BLACK);
-        tries++;
+        steps++;
     }
 
+    // paint origin & destination
     setPixel(displayMat, origin.x, origin.y, CYAN);
     setPixel(displayMat, dest.x, dest.y, CYAN);
 
     spinner.style.display = 'none';
-    distance.innerHTML = `Dm distance: ${tries}`;
+    steps += 2; // account for origin and destination pixels
+
+    // Fill table with data
+    dm.innerHTML = steps;
+    d4.innerHTML = d4Distance(origin, dest);
+    d8.innerHTML = d8Distance(origin, dest);
+    de.innerHTML = euclideanDistance(origin, dest).toFixed(2);
+    show(metrics1);
 
     cv.imshow('canvas', displayMat);
     mat.delete();
@@ -147,56 +166,144 @@ const run1 = image => {
 
 // Run assignment 2
 const run2 = image => {
-    const mat = cv.imread(image);
+    // Read image
+    const imgMat = cv.imread(image);
     const displayMat = cv.imread(image);
 
-    const labels = [];
+    // Setup mat, adding 1 column and 1 row
+    const offset = 1;
+    const mat = new cv.Mat(imgMat.rows + offset, imgMat.cols + offset, imgMat.type());
+
+    for (let i = 0; i < mat.rows; i++) {
+        for (let j = 0; j < mat.cols; j++) {
+            if (i < offset || j < offset) {
+                setPixel(mat, i, j, WHITE);
+            } else {
+                const pixel = getPixel(imgMat, i - offset, j - offset);
+                setPixel(mat, i, j, pixel);
+            }
+        }
+    }
+
+    // 2D array filled with '1'
+    const defaultValue = 0;
+    const labels = Array(mat.rows)
+        .fill(defaultValue)
+        .map(() => Array(mat.cols).fill(defaultValue));
+
+    const equivalentLabels = {};
     let currentLabel = 0;
 
-    const rows = mat.rows;
-    const cols = mat.cols;
+    // Algorithm start
+    for (let i = offset; i < mat.rows; i++) {
+        for (let j = offset; j < mat.cols; j++) {
+            const p = getPixel(mat, i, j);
 
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-            const pixel = getPixel(mat, i, j);
+            if (isBlack(p)) {
+                const t = getPixel(mat, i - 1, j);
+                const r = getPixel(mat, i, j - 1);
 
-            if (isBlack(pixel)) {
-                let chosenLabel;
-                const eightNeighbours = getEightNeighbours(mat, i, j);
-                eightNeighbours.forEach(p => {
-                    for (let l of labels) {
-                        if (l.x === p.x && l.y === p.y) {
-                            chosenLabel = l.label;
-                            break;
-                        }
-                    }
-                });
-
-                console.log(i, j, chosenLabel);
-
-                // If there is a chosenLabel, pixel is near labeled black pixel
-                if (chosenLabel) {
-                    labels.push({
-                        x: i,
-                        y: j,
-                        label: chosenLabel
-                    });
+                if (!isBlack(t) && !isBlack(r)) {
+                    labels[i][j] = ++currentLabel;
+                } else if (isBlack(t) && !isBlack(r)) {
+                    labels[i][j] = labels[t.x][t.y];
+                } else if (!isBlack(t) && isBlack(r)) {
+                    labels[i][j] = labels[r.x][r.y];
                 } else {
-                    labels.push({
-                        x: i,
-                        y: j,
-                        label: currentLabel++
-                    });
+                    // both are black, check if labels match
+                    const labelT = labels[t.x][t.y];
+                    const labelR = labels[r.x][r.y];
+
+                    if (labelT != labelR) {
+                        // they should have the same label!
+
+                        if (labelT == 0 || labelR == 0) {
+                            // Maybe one of them doesn't have a label
+                            let selectedLabel;
+                            if (labelT == 0) {
+                                selectedLabel = labelR;
+                            } else {
+                                selectedLabel = labelT;
+                            }
+
+                            labels[i][j] = selectedLabel;
+                            labels[i - 1][j] = selectedLabel;
+                            labels[i][j - 1] = selectedLabel;
+                        } else {
+                            // check if equivalency does not already exists
+                            if (
+                                (equivalentLabels[labelT] && equivalentLabels[labelT] != labelR) ||
+                                (equivalentLabels[labelR] && equivalentLabels[labelR]) != labelT
+                            ) {
+                                equivalentLabels[labelT] = labelR;
+                            }
+                        }
+                    } else {
+                        labels[i][j] = labelT;
+                    }
                 }
             }
         }
     }
 
-    console.log(labels.map(x => x.label));
+    // Fix equivalent labels
+    for (let i = 0; i < mat.rows; i++) {
+        for (let j = 0; j < mat.cols; j++) {
+            Object.keys(equivalentLabels).forEach(key => {
+                let label = labels[i][j];
+                if (label == key) labels[i][j] = equivalentLabels[key];
+            });
+        }
+    }
+
+    // Remove duplicates
+    const allLabels = [];
+
+    for (let i = 0; i < mat.rows; i++) {
+        for (let j = 0; j < mat.cols; j++) {
+            if (!allLabels.includes(labels[i][j])) {
+                allLabels.push(labels[i][j]);
+            }
+        }
+    }
+
+    // Orders labels
+    for (let i = 0; i < mat.rows; i++) {
+        for (let j = 0; j < mat.cols; j++) {
+            for (let l = 0; l < allLabels.length; l++) {
+                if (labels[i][j] == allLabels[l]) {
+                    labels[i][j] = l;
+                }
+            }
+        }
+    }
+
+    // Orders labels
+    for (let l = 0; l < allLabels.length; l++) {
+        allLabels[l] = l;
+    }
+
+    // Show some pretty colors to tell labels appart
+    for (let i = 0; i < mat.rows; i++) {
+        for (let j = 0; j < mat.cols; j++) {
+            setPixel(mat, i, j, {
+                r: 255 - ((255 * 1) / 3) * (allLabels.indexOf(labels[i][j]) + 1),
+                g: 255 - ((255 * 1) / 2) * (allLabels.indexOf(labels[i][j]) + 1),
+                b: 255 - ((255 * 2) / 3) * (allLabels.indexOf(labels[i][j]) + 1),
+                a: 255
+            });
+        }
+    }
+
+    console.log(allLabels);
+
+    cc.innerHTML = allLabels.length;
+    show(metrics2);
 
     spinner.style.display = 'none';
 
     cv.imshow('canvas', mat);
     mat.delete();
+    imgMat.delete();
     displayMat.delete();
 };

@@ -1,0 +1,35 @@
+clear();
+console.log(equivalentLabels);
+var optimizedLabels = {};
+Object.keys(equivalentLabels).forEach(key => {
+	console.log('labels: ');
+	console.log(JSON.stringify(optimizedLabels));
+	console.log("current key: " + key);
+    if (optimizedLabels.hasOwnProperty(key)) {
+		console.log("optimizedLabels contains key " + key);
+        optimizedLabels[key].push(equivalentLabels[key]);
+		console.log(equivalentLabels[key] + ' pushed to  optimizedLabels');
+    } else {
+		console.log("optimizedLabels doesnt contain key " + key);
+        let matched = false;
+        Object.keys(optimizedLabels).forEach(k => {
+			console.log('----current k: ' + k);
+			console.log('----optimizedLabels[k]: ' + optimizedLabels[k]);
+			console.log('----optimizedLabels[k] contains key: ' + optimizedLabels[k].find((e) => e == key) == key);
+            if (optimizedLabels[k].find((e) => e == key) == key) {
+				console.log('----optimizedLabels key ' + k + ' contains val ' + key);
+                optimizedLabels[k].push(equivalentLabels[key]);
+				console.log('-----' + equivalentLabels[key] + ' pushed to optimizesLabels key ' + k);
+                matched = true;
+            }
+        });
+        if (!matched) {
+			console.log("No previous entries found");
+            optimizedLabels[key] = [equivalentLabels[key]];
+			console.log('created key ' + key + ' with value ' + [equivalentLabels[key]]);
+
+     }
+    }
+});
+
+console.log(optimizedLabels);

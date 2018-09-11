@@ -20,6 +20,13 @@ const BLACK = {
     a: 255
 };
 
+const WHITE = {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 255
+};
+
 // Helper functions for image manipulation
 const getPixel = (mat, x, y) => ({
     x,
@@ -44,6 +51,7 @@ const toGrayScale = mat => {
     for (var i = 0; i < rows; i++) {
         for (var j = 0; j < cols; j++) {
             let pixel = getPixel(mat, i, j);
+            // extract Y component from YCbCr
             const y = pixel.r * 0.299 + pixel.g * 0.587 + pixel.b * 0.114;
             pixel.r = pixel.g = pixel.b = y;
 
@@ -63,6 +71,15 @@ const getEightNeighbours = (mat, x, y) => [
     getPixel(mat, x + 1, y + 1)
 ];
 
+const get4Neighbours = (mat, x, y) => [
+    getPixel(mat, x, y - 1),
+    getPixel(mat, x, y + 1),
+    getPixel(mat, x - 1, y),
+    getPixel(mat, x + 1, y)
+];
+
 const euclideanDistance = (a, b) => Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+const d4Distance = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+const d8Distance = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 
 const isBlack = ({ r, g, b, a }) => r === 0 && g === 0 && b === 0;
